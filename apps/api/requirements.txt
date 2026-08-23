@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+SQLAlchemy
+pg8000
+pydantic
+pydantic-settings
+pytest
+httpx
