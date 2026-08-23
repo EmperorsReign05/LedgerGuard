@@ -1,0 +1,34 @@
+{
+  "dataset": {
+    "description": "Generated synthetic financial records representing transactions across different layers.",
+    "entities": {
+      "Payment": {
+        "id": "String (e.g., P-12345)",
+        "amount": "Integer (smallest unit, e.g., paise)",
+        "currency": "String (INR)",
+        "captured_at": "ISO-8601 Timestamp",
+        "metadata": "Object (custom data)"
+      },
+      "Settlement": {
+        "id": "String (e.g., S-67890)",
+        "amount": "Integer (smallest unit)",
+        "fees": "Integer",
+        "tax": "Integer",
+        "utr": "String",
+        "settled_at": "ISO-8601 Timestamp",
+        "payment_references": "List of Payment IDs"
+      }
+    }
+  },
+  "ground_truth": {
+    "description": "The exact expected state and resolution for a set of related records.",
+    "fields": {
+      "case_id": "Identifier for the scenario",
+      "records": "List of record IDs involved (e.g., P-123, S-456)",
+      "expected_status": "Status the system should reach (e.g., EXACT_MATCH, EXCEPTION)",
+      "expected_match": "List of IDs that should be matched together",
+      "expected_root_cause": "The true reason for the anomaly (e.g., AMOUNT_MISMATCH_FEE_VARIANCE, NONE)",
+      "expected_action": "The decision the AI/Policy Engine should make (e.g., AUTO_RESOLVE, ESCALATE, REJECT)"
+    }
+  }
+}
