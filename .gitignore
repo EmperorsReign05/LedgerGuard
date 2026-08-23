@@ -23,3 +23,9 @@ dist/
 .idea/
 *.swp
 .DS_Store
+
+# Databases
+*.db
+
+# Next.js auto-generated
+AGENTS.md
