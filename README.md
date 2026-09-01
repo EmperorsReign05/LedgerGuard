@@ -2,13 +2,39 @@
 
 An AI finance controller that reconciles settlement records, investigates exceptions using evidence, and automatically resolves only cases that meet explicit confidence and policy requirements.
 
-## Architecture & Product Thesis
+## Architecture
 
-**Don't build an AI that always acts. Build an AI finance controller that knows when it has enough evidence to act.**
+The project consists of three main components:
+1. **Database**: PostgreSQL (hosted on NeonDB)
+2. **API Backend**: FastAPI python service handling the core deterministic matcher and the Groq LLM integration.
+3. **Frontend Dashboard**: A Next.js web application.
 
-LedgerGuard uses deterministic logic wherever it is appropriate, and AI only where ambiguity requires reasoning. Every automated decision is gated by explicit confidence thresholds and policies.
+## How to Run Locally
 
-See `context.md` for a complete breakdown of the product definition and current state.
+You will need two terminal windows to run both the frontend and the backend.
+
+### 1. Start the FastAPI Backend
+```bash
+cd ledgerguard/apps/api
+# Ensure your virtual environment is activated
+.\venv\Scripts\activate
+
+# Start the server on port 8001
+python -m uvicorn app.main:app --port 8001
+```
+
+### 2. Start the Next.js Frontend
+```bash
+cd ledgerguard/apps/web
+
+# Install dependencies if you haven't already
+npm install
+
+# Start the dev server on port 3000
+npm run dev
+```
+
+Finally, open your browser and navigate to `http://localhost:3000`.
 
 ## Setup Instructions
 
