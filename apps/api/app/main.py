@@ -83,15 +83,19 @@ def run_matching(db: Session = Depends(get_db)):
             settlement = db.query(Settlement).filter(Settlement.id == r.candidate_record_id).first()
             
             if payment and settlement:
-                decision = ai_service.investigate(r, payment, settlement)
-                ai_decisions_made += 1
-                
-                # Append AI reason to the existing reason
-                r.reason = f"AI [{decision.action}]: {decision.reason} (Confidence: {decision.confidence})"
-                
-                if decision.action == "AUTO_RESOLVE":
-                    r.status = "RESOLVED"
-                elif decision.action == "REJECT":
+                try:
+                    decision = ai_service.investigate(r, payment, settlement)
+                    ai_decisions_made += 1
+                    
+                    # Append AI reason to the existing reason
+                    r.reason = f"AI [{decision.action}]: {decision.reason} (Confidence: {decision.confidence})"
+                    
+                    if decision.action == "AUTO_RESOLVE":
+                        r.status = "RESOLVED"
+                    elif decision.action == "REJECT":
+                        r.status = "EXCEPTION"
+                except Exception as e:
+                    r.reason = f"AI [ERROR]: Failed to investigate - {str(e)}"
                     r.status = "EXCEPTION"
                     
     db.commit()

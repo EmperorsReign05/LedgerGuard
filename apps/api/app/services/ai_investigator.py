@@ -21,9 +21,9 @@ class AIInvestigatorService:
         system_prompt = """You are an AI Finance Controller. 
 Your job is to analyze ambiguous financial transactions and determine if there is enough evidence to resolve them.
 Do NOT hallucinate. Use only the provided evidence.
-Output a JSON object matching this schema:
+Output a JSON object matching this exact schema:
 {
-    "confidence": float (0.0 to 1.0),
+    "confidence": float (must be a number between 0.0 and 1.0, e.g. 0.95),
     "action": string ("AUTO_RESOLVE" if confidence >= 0.9, "ESCALATE" if confidence >= 0.5, "REJECT" if confidence < 0.5 or high risk),
     "reason": string (explain your exact reasoning based on the evidence)
 }"""
