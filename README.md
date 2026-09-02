@@ -16,11 +16,9 @@ You will need two terminal windows to run both the frontend and the backend.
 ### 1. Start the FastAPI Backend
 ```bash
 cd ledgerguard/apps/api
-# Ensure your virtual environment is activated
-.\venv\Scripts\activate
 
-# Start the server on port 8001
-python -m uvicorn app.main:app --port 8001
+# Run uvicorn directly using the virtual environment's python executable
+.\venv\bin\python.exe -m uvicorn app.main:app --port 8001
 ```
 
 ### 2. Start the Next.js Frontend
