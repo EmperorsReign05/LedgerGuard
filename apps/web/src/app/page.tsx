@@ -10,7 +10,7 @@ export default function Dashboard() {
 
   const fetchResults = async () => {
     try {
-      const res = await fetch("http://localhost:8001/api/results");
+      const res = await fetch("http://127.0.0.1:8001/api/results");
       const data = await res.json();
       setResults(data);
       
@@ -34,7 +34,7 @@ export default function Dashboard() {
   const runMatching = async () => {
     setRunning(true);
     try {
-      await fetch("http://localhost:8001/api/run-matching", { method: "POST" });
+      await fetch("http://127.0.0.1:8001/api/run-matching", { method: "POST" });
       await fetchResults();
     } catch (err) {
       console.error("Error running matching", err);
@@ -53,91 +53,115 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container">
-      <div className="header">
-        <h1>LedgerGuard Finance Controller</h1>
-        <p>AI-assisted evidence-based reconciliation dashboard.</p>
-      </div>
+    <div className="layout-wrapper">
+      {/* Dark Forest Green Header Section */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">Finance Controller.</h1>
+          <p className="hero-subtitle">
+            Evidence-based autonomous reconciliation. We use deterministic logic where possible, and AI only where ambiguity requires reasoning.
+          </p>
+          
+          <div className="metrics-grid">
+            <div className="metric-item">
+              <h3>Total Processed</h3>
+              <p>{metrics.total}</p>
+            </div>
+            <div className="metric-item">
+              <h3>Auto Resolved</h3>
+              <p>{metrics.resolved}</p>
+            </div>
+            <div className="metric-item">
+              <h3>Exceptions</h3>
+              <p>{metrics.exceptions}</p>
+            </div>
+            <div className="metric-item">
+              <h3>Unresolved</h3>
+              <p>{metrics.unresolved}</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <div className="metrics-grid">
-        <div className="metric-card">
-          <h3>Total Processed</h3>
-          <p>{metrics.total}</p>
-        </div>
-        <div className="metric-card">
-          <h3>Auto Resolved</h3>
-          <p>{metrics.resolved}</p>
-        </div>
-        <div className="metric-card">
-          <h3>Escalated Exceptions</h3>
-          <p>{metrics.exceptions}</p>
-        </div>
-        <div className="metric-card">
-          <h3>Unresolved</h3>
-          <p>{metrics.unresolved}</p>
-        </div>
-      </div>
+      {/* Cream Body Section */}
+      <main className="main-content">
+        <div className="content-container">
+          
+          <div className="section-header">
+            <h2 className="section-title">Reconciliation Queue</h2>
+            <button className="btn-primary" onClick={runMatching} disabled={running}>
+              {running ? (
+                <>
+                  <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.25" />
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                  </svg>
+                  Processing Batch...
+                </>
+              ) : (
+                "Run AI Investigator"
+              )}
+            </button>
+          </div>
 
-      <div className="controls">
-        <button className="btn" onClick={runMatching} disabled={running}>
-          {running ? "Processing Batch..." : "Run AI Matching Pipeline"}
-        </button>
-      </div>
-
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Status</th>
-              <th>Payment</th>
-              <th>Settlement</th>
-              <th>Details & AI Reasoning</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={5} style={{textAlign: "center"}}>Loading...</td></tr>
-            ) : results.length === 0 ? (
-              <tr><td colSpan={5} style={{textAlign: "center"}}>No records found. Seed DB and run pipeline.</td></tr>
-            ) : (
-              results.map((r: any) => (
-                <tr key={r.id}>
-                  <td><strong>#{r.id}</strong></td>
-                  <td>{getStatusBadge(r.status)}</td>
-                  <td>
-                    {r.payment ? (
-                      <div>
-                        <div>{r.payment.amount} {r.payment.currency}</div>
-                        <div className="code-block">{r.payment.id}</div>
-                      </div>
-                    ) : "None"}
-                  </td>
-                  <td>
-                    {r.settlement ? (
-                      <div>
-                        <div>{r.settlement.amount} INR</div>
-                        <div className="code-block">{r.settlement.id}</div>
-                        {r.settlement.utr && <div style={{marginTop: "0.25rem", color: "var(--muted)", fontSize: "0.75rem"}}>UTR: {r.settlement.utr}</div>}
-                      </div>
-                    ) : "None"}
-                  </td>
-                  <td>
-                    <div style={{fontWeight: 500}}>{r.match_type.replace("_", " ")}</div>
-                    <div style={{color: "var(--muted)", fontSize: "0.75rem", marginBottom: "0.5rem"}}>Score: {r.match_score}</div>
-                    
-                    {r.reason && (
-                      <div className="ai-reasoning">
-                        {r.reason}
-                      </div>
-                    )}
-                  </td>
+          <div className="data-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Match ID</th>
+                  <th>Status</th>
+                  <th>Payment (Source)</th>
+                  <th>Settlement (Candidate)</th>
+                  <th>Investigation Evidence</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr><td colSpan={5} className="loading-state">Loading queue...</td></tr>
+                ) : results.length === 0 ? (
+                  <tr><td colSpan={5} className="loading-state" style={{fontSize: '1rem'}}>No records found. Seed DB and run pipeline.</td></tr>
+                ) : (
+                  results.map((r: any) => (
+                    <tr key={r.id}>
+                      <td>
+                        <span style={{color: "var(--text-muted-dark)", fontSize: "0.875rem"}}>#{r.id}</span>
+                      </td>
+                      <td>{getStatusBadge(r.status)}</td>
+                      <td>
+                        {r.payment ? (
+                          <div>
+                            <div className="value-display">{r.payment.amount} <span style={{fontSize: "0.875rem", fontWeight: 400}}>{r.payment.currency}</span></div>
+                            <div className="code-block">{r.payment.id}</div>
+                          </div>
+                        ) : <span style={{color: "var(--text-muted-dark)"}}>None</span>}
+                      </td>
+                      <td>
+                        {r.settlement ? (
+                          <div>
+                            <div className="value-display">{r.settlement.amount} <span style={{fontSize: "0.875rem", fontWeight: 400}}>INR</span></div>
+                            <div className="code-block">{r.settlement.id}</div>
+                            {r.settlement.utr && <div style={{marginTop: "0.5rem", color: "var(--text-muted-dark)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em"}}>UTR: {r.settlement.utr}</div>}
+                          </div>
+                        ) : <span style={{color: "var(--text-muted-dark)"}}>None</span>}
+                      </td>
+                      <td>
+                        <div style={{fontWeight: 600, color: "var(--text-dark)", textTransform: "capitalize"}}>{r.match_type.toLowerCase().replace("_", " ")}</div>
+                        <div style={{color: "var(--text-muted-dark)", fontSize: "0.75rem", marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em"}}>Confidence Score: {r.match_score}</div>
+                        
+                        {r.reason && (
+                          <div className="ai-reasoning">
+                            {r.reason}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
