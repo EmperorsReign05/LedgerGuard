@@ -87,3 +87,12 @@ class AuditEvent(Base):
     confidence = Column(Float, nullable=True)
     policy_version = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    reconciliation_result_id = Column(Integer, ForeignKey("reconciliation_results.id"), nullable=False, index=True)
+    role = Column(String, nullable=False) # 'user', 'assistant', 'system', 'tool'
+    content = Column(String, nullable=False)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
