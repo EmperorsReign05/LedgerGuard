@@ -1,167 +1,107 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { ShieldAlert, CheckCircle2, Clock, Activity } from "lucide-react";
 
 export default function Dashboard() {
-  const [results, setResults] = useState([]);
+  const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [running, setRunning] = useState(false);
-  const [metrics, setMetrics] = useState({ total: 0, resolved: 0, exceptions: 0, unresolved: 0 });
-
-  const fetchResults = async () => {
-    try {
-      const res = await fetch("http://127.0.0.1:8001/api/results");
-      const data = await res.json();
-      setResults(data);
-      
-      setMetrics({
-        total: data.length,
-        resolved: data.filter((d: any) => d.status === "RESOLVED").length,
-        exceptions: data.filter((d: any) => d.status === "EXCEPTION").length,
-        unresolved: data.filter((d: any) => d.status === "UNRESOLVED").length,
-      });
-    } catch (err) {
-      console.error("Error fetching results", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchResults();
+    fetch("http://127.0.0.1:8001/api/metrics")
+      .then((res) => res.json())
+      .then((data) => {
+        setMetrics(data);
+        setLoading(false);
+      });
   }, []);
 
-  const runMatching = async () => {
-    setRunning(true);
-    try {
-      await fetch("http://127.0.0.1:8001/api/run-matching", { method: "POST" });
-      await fetchResults();
-    } catch (err) {
-      console.error("Error running matching", err);
-    } finally {
-      setRunning(false);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full text-forest-500">
+        <Activity className="w-8 h-8 animate-pulse" />
+      </div>
+    );
+  }
 
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case "RESOLVED": return <span className="badge badge-success">Resolved</span>;
-      case "EXCEPTION": return <span className="badge badge-error">Exception</span>;
-      case "UNRESOLVED": return <span className="badge badge-warning">Unresolved</span>;
-      default: return <span className="badge badge-default">{status}</span>;
-    }
-  };
+  const chartData = [
+    { name: "Resolved", value: metrics?.resolved || 0, color: "#10b981" },
+    { name: "Unresolved", value: metrics?.unresolved || 0, color: "#eab308" },
+    { name: "Exceptions", value: metrics?.exceptions || 0, color: "#ef4444" },
+  ];
 
   return (
-    <div className="layout-wrapper">
-      {/* Dark Forest Green Header Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <h1 className="hero-title">Finance Controller.</h1>
-          <p className="hero-subtitle">
-            Evidence-based autonomous reconciliation. We use deterministic logic where possible, and AI only where ambiguity requires reasoning.
-          </p>
-          
-          <div className="metrics-grid">
-            <div className="metric-item">
-              <h3>Total Processed</h3>
-              <p>{metrics.total}</p>
-            </div>
-            <div className="metric-item">
-              <h3>Auto Resolved</h3>
-              <p>{metrics.resolved}</p>
-            </div>
-            <div className="metric-item">
-              <h3>Exceptions</h3>
-              <p>{metrics.exceptions}</p>
-            </div>
-            <div className="metric-item">
-              <h3>Unresolved</h3>
-              <p>{metrics.unresolved}</p>
-            </div>
+    <div className="p-10 max-w-6xl mx-auto">
+      <header className="mb-10">
+        <h1 className="text-4xl font-serif font-bold text-forest-900 mb-2">Platform Overview</h1>
+        <p className="text-forest-600 text-lg">Real-time ledger reconciliation analytics</p>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {/* Metric 1 */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-forest-200 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-forest-600 font-medium">Total Volume</h3>
+            <ShieldAlert className="w-5 h-5 text-forest-400" />
+          </div>
+          <div className="text-4xl font-bold text-forest-900">{metrics?.total || 0}</div>
+          <p className="text-sm text-forest-500 mt-2">Transactions processed</p>
+        </div>
+
+        {/* Metric 2 */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-forest-200 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-forest-600 font-medium">Auto-Resolved</h3>
+            <CheckCircle2 className="w-5 h-5 text-green-500" />
+          </div>
+          <div className="text-4xl font-bold text-green-600">{metrics?.resolved || 0}</div>
+          <p className="text-sm text-forest-500 mt-2">Without human intervention</p>
+        </div>
+
+        {/* Metric 3 */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-forest-200 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-forest-600 font-medium">Human Hours Saved</h3>
+            <Clock className="w-5 h-5 text-forest-400" />
+          </div>
+          <div className="text-4xl font-bold text-forest-900">{metrics?.human_hours_saved || 0}<span className="text-xl ml-1 text-forest-500">hrs</span></div>
+          <p className="text-sm text-forest-500 mt-2">Based on 5 mins per exception</p>
+        </div>
+
+        {/* Metric 4 */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-forest-200 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-forest-600 font-medium">Accuracy Rate</h3>
+            <Activity className="w-5 h-5 text-forest-400" />
+          </div>
+          <div className="text-4xl font-bold text-forest-900">{metrics?.accuracy_rate || 0}%</div>
+          <p className="text-sm text-forest-500 mt-2">True Positive Rate</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white rounded-xl shadow-sm border border-forest-200 p-8">
+          <h2 className="text-xl font-serif font-bold text-forest-900 mb-6">Queue Distribution</h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <XAxis dataKey="name" stroke="#a3b8a1" />
+                <YAxis stroke="#a3b8a1" />
+                <Tooltip 
+                  cursor={{fill: '#f3f4f1'}}
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} 
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
-      </section>
-
-      {/* Cream Body Section */}
-      <main className="main-content">
-        <div className="content-container">
-          
-          <div className="section-header">
-            <h2 className="section-title">Reconciliation Queue</h2>
-            <button className="btn-primary" onClick={runMatching} disabled={running}>
-              {running ? (
-                <>
-                  <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" strokeOpacity="0.25" />
-                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                  </svg>
-                  Processing Batch...
-                </>
-              ) : (
-                "Run AI Investigator"
-              )}
-            </button>
-          </div>
-
-          <div className="data-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>Match ID</th>
-                  <th>Status</th>
-                  <th>Payment (Source)</th>
-                  <th>Settlement (Candidate)</th>
-                  <th>Investigation Evidence</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr><td colSpan={5} className="loading-state">Loading queue...</td></tr>
-                ) : results.length === 0 ? (
-                  <tr><td colSpan={5} className="loading-state" style={{fontSize: '1rem'}}>No records found. Seed DB and run pipeline.</td></tr>
-                ) : (
-                  results.map((r: any) => (
-                    <tr key={r.id}>
-                      <td>
-                        <span style={{color: "var(--text-muted-dark)", fontSize: "0.875rem"}}>#{r.id}</span>
-                      </td>
-                      <td>{getStatusBadge(r.status)}</td>
-                      <td>
-                        {r.payment ? (
-                          <div>
-                            <div className="value-display">{r.payment.amount} <span style={{fontSize: "0.875rem", fontWeight: 400}}>{r.payment.currency}</span></div>
-                            <div className="code-block">{r.payment.id}</div>
-                          </div>
-                        ) : <span style={{color: "var(--text-muted-dark)"}}>None</span>}
-                      </td>
-                      <td>
-                        {r.settlement ? (
-                          <div>
-                            <div className="value-display">{r.settlement.amount} <span style={{fontSize: "0.875rem", fontWeight: 400}}>INR</span></div>
-                            <div className="code-block">{r.settlement.id}</div>
-                            {r.settlement.utr && <div style={{marginTop: "0.5rem", color: "var(--text-muted-dark)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em"}}>UTR: {r.settlement.utr}</div>}
-                          </div>
-                        ) : <span style={{color: "var(--text-muted-dark)"}}>None</span>}
-                      </td>
-                      <td>
-                        <div style={{fontWeight: 600, color: "var(--text-dark)", textTransform: "capitalize"}}>{r.match_type.toLowerCase().replace("_", " ")}</div>
-                        <div style={{color: "var(--text-muted-dark)", fontSize: "0.75rem", marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em"}}>Confidence Score: {r.match_score}</div>
-                        
-                        {r.reason && (
-                          <div className="ai-reasoning">
-                            {r.reason}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }
